@@ -1,41 +1,30 @@
 package com.mycompany.mapper
-
+import com.mycompany.configuration.ConfigurationParameters
+import com.mycompany.utils.Utils
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions.col
-import scala.collection.mutable.Map
+
 import org.slf4j.LoggerFactory
+import scala.collection.mutable
 
 trait Mapper {
-  val outputDir:String
-  val inputFile:String
-  val mapper:Map[String,String]
-  val colNames: Array[String] = mapper.keySet.toArray
+  val outputDir: String = ConfigurationParameters.outputDirectory
+  val inputFile: String = ConfigurationParameters.inputDirectory
+  val fieldNames: DataFrame = ConfigurationParameters.fieldNames
+  val columnNames: mutable.Map[String, String] = Utils.getColumns(fieldNames.rdd)
+  val colNames: Array[String] = columnNames.keySet.toArray
   var df: DataFrame
+
   def writeToParquet(): Unit = {
     df.write.parquet(outputDir)
   }
 }
 
-private case class CSV(inputFile:String,outputDir:String,mapper:Map[String,String]) extends Mapper{
-  override var df:DataFrame = spark.read.option("inferSchema",true).csv(inputFile+"/*").select(colNames.map(m=>col(m).as(mapper.getOrElse(m,m))):_*)
-}
-
-private case class TSV(inputFile:String,outputDir:String,mapper:Map[String,String]) extends Mapper{
-  override var df: DataFrame = spark.read.option("sep", "\t").option("inferSchema",true).csv(inputFile+"/*")select(colNames.map(m=>col(m).as(mapper.getOrElse(m,m))):_*)
-}
-
-private case class JSON(inputFile:String,outputDir:String,mapper:Map[String,String]) extends Mapper{
-  override val colNames:Array[String] = mapper.values.toArray
-  override var df: DataFrame = spark.read.option("inferSchema",true).json(inputFile+"/*").select(colNames.map(m=>col(m)):_*)
-
-}
-
 object ParquetWriter{
   private val LOGGER = LoggerFactory.getLogger(ParquetWriter.getClass)
-  def apply(fileType:String,inputFile:String, outputDir:String,mapper:Map[String,String]): Mapper = fileType match{
-    case "csv" =>CSV(inputFile,outputDir,mapper)
-    case "tsv" => TSV(inputFile,outputDir,mapper)
-    case "json" => JSON(inputFile,outputDir,mapper)
+  def apply(fileType:String): Mapper = fileType match{
+    case "csv" =>CSVMapper()
+    case "tsv" => TSVMapper()
+    case "json" => JSONMapper()
   }
   LOGGER.info("Successfully written parquet file")
 }

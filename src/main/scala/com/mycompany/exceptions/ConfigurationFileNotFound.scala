@@ -1,3 +1,3 @@
 package com.mycompany.exceptions
 
-case class ConfigurationFileNotFound(message: String="") extends Exception
+case class ConfigurationFileNotFoundException(message: String="") extends Exception(message)
