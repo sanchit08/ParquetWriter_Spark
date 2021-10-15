@@ -7,7 +7,7 @@ This repo contains code for a Spark job that converts an input CSV, TSV or JSON 
 In addition to Spark 3.1.1 and Scala 2.1.12 the additional packages required are :
 
 * [sbt](https://www.scala-sbt.org/) : An interactive build tool for Scala and Java projects.
-* [scaltest](https://www.scalatest.org/) : A testing tool to be used in Scala ecosystem.
+* [scalatest](https://www.scalatest.org/) : A testing tool to be used in Scala ecosystem.
 
 ## Configuration File
 A JSON file is used as a configuration file for providing necessary arguements for running the Spark job. The following are the necessary fields in the configuration file.
