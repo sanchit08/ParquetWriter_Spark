@@ -1,14 +1,26 @@
 package com.mycompany.configuration
 
 import com.mycompany.exceptions.ConfigurationFileNotFoundException
-import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.flatspec.AnyFlatSpec
+import ujson.Value
 
-class ConfigurationParametersTest extends AnyFunSuite {
+class ConfigurationParametersTest extends AnyFlatSpec {
 
-  test("ifFileExists must throw ConfigurationFileNotFound exception if no path is specified"){
-    assertThrows[ConfigurationFileNotFoundException]{
-      ConfigurationParameters.ifFileExists("invalid/path/to/file.json")
+  def fixtures =
+    new {
+      val jsonString = scala.io.Source.fromResource("conf.json").mkString
+      val configurationData = ujson.read(jsonString)
     }
+
+  "ifFileExists" should "throw ConfigurationFileNotFoundException" in {
+    assertThrows[ConfigurationFileNotFoundException]{
+      ConfigurationParameters.ifFileExists("/invalid/file/path")
+    }
+  }
+
+  "parseConfigurationFile" should "successfully parse configuration file" in{
+    val f = fixtures
+    assert(f.configurationData.isInstanceOf[Value.Value])
   }
 
 }

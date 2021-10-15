@@ -8,3 +8,6 @@ libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.1.2" % "provided"
 libraryDependencies += "org.slf4j" % "slf4j-api" % "2.0.0-alpha1"
 libraryDependencies += "org.slf4j" % "slf4j-log4j12" % "2.0.0-alpha1" % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+libraryDependencies += "org.apache.spark" %% "spark-sql-kafka-0-10" % "3.1.2" % Test
+libraryDependencies += "com.lihaoyi" %% "ujson" % "1.4.2"
+libraryDependencies += "com.lihaoyi" %% "os-lib" % "0.7.8"

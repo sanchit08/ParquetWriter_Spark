@@ -6,14 +6,10 @@ import org.slf4j.LoggerFactory
 
 object Main extends App {
   private val LOGGER = LoggerFactory.getLogger(Main.getClass)
-  System.out.println(args.length)
-
   if (args.length == 0) throw ExpectedArgumentNotFound("ExpectedArgumentNotFound : first argument must be the path to the configuration file")
 
-
   val file = args(0)
-  ConfigurationParameters.getParameters(file)
+  ConfigurationParameters.parseConfigurationFile(file)
   val fileType = ConfigurationParameters.fileType
-
   ParquetWriter(fileType = fileType).writeToParquet()
 }

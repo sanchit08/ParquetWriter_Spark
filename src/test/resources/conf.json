@@ -1,0 +1,17 @@
+{
+  "fileType" : "csv",
+  "kafkaTopic" : "http",
+  "outputDir" : "output",
+  "fieldData" : [
+    {
+      "name" : "ts",
+      "type" : "double",
+      "index" : "0"
+    },
+    {
+      "name" : "uid",
+      "type" : "string",
+      "index" : "1"
+    }
+  ]
+}

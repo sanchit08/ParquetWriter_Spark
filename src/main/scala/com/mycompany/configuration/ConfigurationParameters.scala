@@ -3,39 +3,38 @@ import com.mycompany.exceptions.ConfigurationFileNotFoundException
 import org.slf4j.LoggerFactory
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, explode}
+import ujson.Value
 
 import java.nio.file.{Files, Paths}
+import scala.collection.mutable.ArrayBuffer
 
 
 object ConfigurationParameters{
 
-  private val LOGGER = LoggerFactory.getLogger(ConfigurationParameters.getClass)
   var fileType:String=_
-  var inputDirectory:String=""
+  var kafkaTopic:String=""
   var outputDirectory:String=""
-  var fieldNames:DataFrame = _
+  var fieldData: ArrayBuffer[Field] = ArrayBuffer[Field]()
 
   def ifFileExists(file:String): Unit = {
-    try {
-      if (!Files.exists(Paths.get(file))) throw ConfigurationFileNotFoundException()
-    } catch {
-      case _: ConfigurationFileNotFoundException => LOGGER.error("Configuration file not found in the specified path. Please check if path is specified correctly or whether configuration file is present in given path")
-        System.exit(-1)
-    }
+    if (!Files.exists(Paths.get(file))) throw ConfigurationFileNotFoundException()
   }
 
-  def parseConfigurationFile(file:String): DataFrame = {
+  def parseConfigurationFile(file:String): Unit = {
     ifFileExists(file)
-    val configFile: DataFrame = spark.read.option("multiline", value = true).json(file)
-    LOGGER.info("Successfully parsed configuration file")
-    configFile
+    val jsonString = scala.io.Source.fromFile(file).mkString
+    val configurationData = ujson.read(jsonString)
+    setParameters(configurationData)
+
   }
 
-  def getParameters(file:String): Unit ={
-    val configFileDF = parseConfigurationFile(file)
-    this.fileType = configFileDF.select("fileType").first().getString(0)
-    this.inputDirectory = configFileDF.select("inputDir").first().getString(0)
-    this.outputDirectory= configFileDF.select("outputDir").first().getString(0)
-    this.fieldNames = configFileDF.withColumn("field_data", explode(col("fieldNames"))).select("field_data.name", "field_data.type", "field_data.index")
+  def setParameters(configurationData: Value.Value): Unit ={
+    this.kafkaTopic = configurationData("kafkaTopic").str
+    this.fileType = configurationData("fileType").str
+    this.outputDirectory = configurationData("outputDir").str
+
+    for (data <- configurationData("fieldData").arr){
+      this.fieldData += Field(fieldName = data("name").str, fieldType = data("type").str, index = data("index").str.toInt)
+    }
   }
 }
