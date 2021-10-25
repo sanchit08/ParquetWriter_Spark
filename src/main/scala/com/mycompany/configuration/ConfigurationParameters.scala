@@ -12,6 +12,7 @@ object ConfigurationParameters{
   var kafkaTopic:String=_
   var outputDirectory:String=_
   var kafkaURL:String=_
+  var hdfsPath:String=_
   var fieldData: ArrayBuffer[Field] = ArrayBuffer[Field]()
 
   def ifFileExists(file:String): Unit = {
@@ -32,6 +33,7 @@ object ConfigurationParameters{
     this.fileType = configurationData("fileType").str
     this.outputDirectory = configurationData("outputDir").str
     this.kafkaURL = configurationData("kafkaURL").str
+    this.hdfsPath = configurationData("hdfsPath").str
     this.fieldData = configurationData("fieldData").arr.map(i => Field(i("name").str, i("type").str, i("index").str.toInt))
 
   }

@@ -9,7 +9,7 @@ import scala.collection.mutable.ArrayBuffer
 
 object Utils{
   def writeToParquet(finalDF: DataFrame): Unit = {
-    finalDF.write.mode(SaveMode.Overwrite).parquet("hdfs://namenode:9000/"+ConfigurationParameters.outputDirectory)
+    finalDF.write.mode(SaveMode.Overwrite).parquet(ConfigurationParameters.hdfsPath+ConfigurationParameters.outputDirectory)
   }
 
   def getSplitDFFromStringDF(dataFrame: DataFrame, DELIMITER:String): DataFrame ={
