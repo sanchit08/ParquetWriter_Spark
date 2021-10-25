@@ -1,0 +1,14 @@
+#sbt
+project/target
+target/
+*.bsp
+sample_output/
+#general
+*.class
+
+#intellij
+*.log
+*.iml
+*.ipr
+*.iws
+.idea
