@@ -1,20 +1,47 @@
 package com.mycompany.utils
 
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.Row
-import org.slf4j.LoggerFactory
-import scala.collection.mutable.Map
+import com.mycompany.configuration.{ConfigurationParameters, Field}
+import org.apache.spark.sql.functions.{col, from_json, split}
+import org.apache.spark.sql.types.{MapType, StringType}
+import org.apache.spark.sql.{DataFrame, SaveMode}
 
-object Utils {
-  private val logger = LoggerFactory.getLogger(Utils.getClass)
-  def getColumns(rdd: RDD[Row]):Map[String,String]={
-    val map = Map[String,String]()
-    for (row <- rdd.collect()) {
-      val name = row.getString(0)
-      val index = "_c" + row.getString(2)
-      map += (index -> name)
-    }
-    logger.info("Successfully read all fields from configuration file")
-    map
+import scala.collection.mutable.ArrayBuffer
+
+object Utils{
+  def writeToParquet(finalDF: DataFrame): Unit = {
+    finalDF.write.mode(SaveMode.Overwrite).parquet("hdfs://namenode:9000/"+ConfigurationParameters.outputDirectory)
   }
+
+  def getSplitDFFromStringDF(dataFrame: DataFrame, DELIMITER:String): DataFrame ={
+    val splitDF: DataFrame = dataFrame.select(split(col("value"), DELIMITER)
+      .as("value"))
+    splitDF
+  }
+  def getFinalDF(dataFrame: DataFrame, fieldDataArray: ArrayBuffer[Field], columnType: String): DataFrame = {
+    val finalDF = dataFrame.select(fieldDataArray.map(i => col("value")
+      .getItem(if (columnType == "array") i.index else i.fieldName)
+      .cast(i.fieldType)
+      .as(i.fieldName)): _*)
+    finalDF
+  }
+
+  def getDFFromKafka(kafkaURL: String, kafkaTopic: String): DataFrame ={
+    val df: DataFrame = spark.read.format("kafka")
+      .option("kafka.bootstrap.servers",kafkaURL)
+      .option("subscribe",kafkaTopic).load()
+    val stringDF = df.select(col("value").cast("string"))
+    stringDF
+  }
+
+  def getMappedDFFromStringDF(dataFrame: DataFrame): DataFrame={
+    val mappedDF: DataFrame = dataFrame.withColumn("value",
+      from_json(col("value"),
+        MapType(StringType, StringType)))
+      .select(col("value"))
+    mappedDF
+  }
+
+
+
+
 }

@@ -2,6 +2,7 @@
 project/target
 target/
 *.bsp
+sample_output/
 #general
 *.class
 

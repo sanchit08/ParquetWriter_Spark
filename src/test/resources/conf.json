@@ -2,6 +2,7 @@
   "fileType" : "csv",
   "kafkaTopic" : "http",
   "outputDir" : "output",
+  "kafkaURL" : "192.168.32.3:9093",
   "fieldData" : [
     {
       "name" : "ts",

@@ -1,14 +1,10 @@
 package com.mycompany.mapper
 
+import com.mycompany.utils.Utils
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions.{col, split}
 
-case class TSVMapper() extends Mapper{
-  override var finalDF: DataFrame = df.select(split(col("value"), "\t")
-    .as("value"))
-    .select(fieldData.map(i => col("value")
-      .getItem(i.index)
-      .cast(i.fieldType)
-      .as(i.fieldName)): _*)
+class TSVMapper() extends Mapper{
+  val splitDF: DataFrame = Utils.getSplitDFFromStringDF(inputDF,DELIMITER = "\t")
+  override var finalDF: DataFrame = Utils.getFinalDF(splitDF, fieldData,columnType = "array")
 }
 
